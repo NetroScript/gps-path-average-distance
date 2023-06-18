@@ -12,7 +12,7 @@ use gpx::{Gpx, Track, TrackSegment};
 #[derive(Parser)]
 #[command(
     name = "gps-path-average-distance",
-    version = "0.1.0",
+    version = "0.1.1",
     author = "NetroScript",
     about = "This application takes a reference GPS path and compares it to one to many other gps tracks to then calculate the average distance between the two paths. This works by averaging the distance of the closest point on the reference path to the other path."
 )]
@@ -49,7 +49,10 @@ macro_rules! debug_print {
 }
 
 fn main() {
-    let _ = control::set_virtual_terminal(true);
+
+    #[cfg(windows)] {
+        let _ = colored::control::set_virtual_terminal(true).unwrap_or(());
+    }
 
     // Parse the command line arguments
     let matches = Cli::parse();
