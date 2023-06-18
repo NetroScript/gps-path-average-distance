@@ -6,6 +6,16 @@ The application provides two output values: an average distance "*in time*"* and
 
 When sampling points along the track(s) to compare against the reference, it is possible to encounter multiple points at the same location if a person remains stationary for a period of time. Consequently, the longer the stationary period, the more the distance measurement becomes skewed towards that particular location. However, the focus may be on understanding the actual differences in paths, irrespective of movement speed or time. To address this, the algorithm simplifies the track using the Douglas-Peucker algorithm prior to calculating the average distance. This simplification process retains only points corresponding to changes in the path's direction, resulting in a simplified path. The average distance is then computed based on this simplified representation, which more accurately reflects the average distance between the paths, independent of movement speed or time.
 
+## Table of Contents
+
+- [GPS Path Average Distance](#gps-path-average-distance)
+  - [Table of Contents](#table-of-contents)
+  - [Installation / Building from Source](#installation--building-from-source)
+  - [Usage](#usage)
+  - [Options](#options)
+  - [Example](#example)
+  - [Exemplary Output](#exemplary-output)
+
 ## Installation / Building from Source
 
 1. Install Rust and Cargo from [https://www.rust-lang.org](https://www.rust-lang.org).
@@ -42,3 +52,12 @@ Options
 ```shell
 gps-path-average-distance -r ./reference.gpx -t ./track1.gpx,./track2.gpx -d -e
 ```
+
+## Exemplary Output
+
+The following figure shows four example paths.
+ The red path is the reference path, while the blue and green paths are the tracks to compare.
+ (Green is the original track, while Blue is the simplified track). 
+ You can see how there is almost no visual difference between the original path and the simplified path.
+
+![Path-distances-example](https://github.com/NetroScript/gps-path-average-distance/assets/18115780/4da5712b-aa1b-4eae-8f52-006a39bccdee)
