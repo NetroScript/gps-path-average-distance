@@ -1,6 +1,6 @@
 # GPS Path Average Distance
 
-This Rust application is designed to compute the average distance between a reference GPS path and one or more additional GPS tracks. The calculation is based on determining the closest point on the reference path for each point on the track(s) being compared.
+This Rust console application is designed to compute the average distance between a reference GPS path and one or more additional GPS tracks. The calculation is based on determining the closest point on the reference path for each point on the track(s) being compared.
 
 The application provides two output values: an average distance "*in time*"* and an "*location-dependent*" average distance. The rationale behind this distinction is as follows:
 
@@ -44,8 +44,6 @@ Options
     * This value is used as the epsilon in the Douglas-Peucker algorithm for simplifying the current path. The bigger the value, the more simplified the path will be. The reference "space" is in latitude and longitude, for this reason the value is quite small by default.
 * `-e, --export_track`: Toggle to also reexport the parsed GPX files as simplified GPX files.
     * Exported files will be named `<original_file_name>.modified.gpx` and will be placed in the same directory as the original file. No GPX extensions are supported, so you will be left with only track points containing latitude and longitude.
-
-5. Replace `[arguments]` with the appropriate command-line arguments. Here are the available options:
 
 ## Example
 
