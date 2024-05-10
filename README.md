@@ -60,4 +60,4 @@ The following figure shows four example paths.
  (Green is the original track, while Blue is the simplified track). 
  You can see how there is almost no visual difference between the original path and the simplified path.
 
-![Path-distances-example](https://github.com/NetroScript/gps-path-average-distance/assets/18115780/4da5712b-aa1b-4eae-8f52-006a39bccdee)
+![Path-distances-example](https://github.com/NetroScript/gps-path-average-distance/assets/18115780/b2270fd9-0ab9-4cf4-92b6-312c4ede3dba)
