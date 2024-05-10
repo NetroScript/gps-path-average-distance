@@ -3,11 +3,14 @@ use std::io::BufReader;
 use std::path::PathBuf;
 
 use clap::{arg, command, Parser};
-use colored::{control, Colorize};
-use geo::GeodesicDistance;
+use colored::{Colorize};
+use geo::{GeodesicDistance, Point};
+use geo::FrechetDistance;
+use geo::HausdorffDistance;
 use geo::{Closest, ClosestPoint, LineString, Simplify};
 use gpx::{read, write, Waypoint};
 use gpx::{Gpx, Track, TrackSegment};
+use flat_projection::{FlatProjection};
 
 #[derive(Parser)]
 #[command(
@@ -109,6 +112,12 @@ fn main() {
 
     // Check that the reference path has at least one track
     let reference_track: Track = if reference_gpx.tracks.len() > 0 {
+
+        // If there are more than 1 track, print a warning that only the first track will be used and that it potentially should be manually checked if this is correct
+        if reference_gpx.tracks.len() > 1 {
+            println!("The reference path contains more than one track. Only the first track will be used. Please verify that this is the correct track.");
+        }
+
         // Get the first track of the reference path
         reference_gpx.tracks[0].clone()
     }
@@ -238,6 +247,45 @@ fn main() {
                 );
             });
 
+            // To calculate the hausdorff and frechet distance, we need both the current track and the reference track as LineStrings
+            // However they currently are stored as TrackSegments, so we need to join them into a single LineString
+            // Additionally, the coordinates are stored in LatLon, we however are interested in a distance in meters
+            // So it is also necessary to project the coordinates to a different coordinate system representing meters
+
+            // To do so, find the average position of all the points in the reference track, around which we can project the coordinates
+            let total_points = reference_track.segments.iter().map(|segment| segment.points.len() as f64).sum::<f64>();
+            let sum_positions = reference_track.segments.iter().flat_map(|segment| &segment.points).fold(Point::new(0.0, 0.0), |acc, waypoint| {
+                Point::new(acc.x() + waypoint.point().x(), acc.y() + waypoint.point().y())
+            });
+            let average_position = Point::new(sum_positions.x() / total_points, sum_positions.y() / total_points);
+
+
+            let projector = FlatProjection::new(average_position.x(), average_position.y());
+
+            // Function to join and project segments
+            fn join_and_project_segments(segments: &[TrackSegment], projector: &FlatProjection<f64>) -> LineString {
+                let mut joined_segment = TrackSegment::new();
+                segments.iter().for_each(|segment| {
+                    joined_segment.points.extend(segment.points.iter().map(|point| {
+                        let projected_point = projector.project(point.point().x(), point.point().y());
+                        Waypoint::new(Point::new(projected_point.x, projected_point.y))
+                    }));
+                });
+                joined_segment.linestring()
+            }
+
+            // Use the function for both current and reference tracks
+            let joined_current_linestring = join_and_project_segments(&track.segments, &projector);
+            let joined_reference_linestring = join_and_project_segments(&reference_track.segments, &projector);
+
+            // Calculate the frechet distance (in kilometers)
+            let frechet_distance = joined_current_linestring.frechet_distance(&joined_reference_linestring);
+
+            // Calculate the hausdorff distance (in kilometers)
+            let hausdorff_distance = joined_current_linestring.hausdorff_distance(&joined_reference_linestring);
+
+
+
             println!(
                 "Average distance (in time): {} (counting every point)",
                 (format!("{:.3}m", (total_distance / total_points as f64)))
@@ -252,6 +300,18 @@ fn main() {
                 ))
                 .yellow()
                 .bold()
+            );
+            println!(
+                "Fréchet distance: {}",
+                (format!("{:.3}m", frechet_distance * 1000.0))
+                    .magenta()
+                    .bold()
+            );
+            println!(
+                "Hausdorff distance: {}",
+                (format!("{:.3}m", hausdorff_distance * 1000.0))
+                    .green()
+                    .bold()
             );
 
             track_index += 1;

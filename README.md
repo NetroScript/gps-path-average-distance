@@ -1,10 +1,12 @@
 # GPS Path Average Distance
 
-This Rust console application is designed to compute the average distance between a reference GPS path and one or more additional GPS tracks. The calculation is based on determining the closest point on the reference path for each point on the track(s) being compared.
+This Rust console application is designed to compute the average distance between a reference GPS path and one or more additional GPS tracks. The calculation is based on determining the closest point on the reference path for each point on the track(s) being compared. Additionally, conventional curve metrics such as the Hausdorff distance and the Fréchet distance are provided as output.
 
-The application provides two output values: an average distance "*in time*"* and an "*location-dependent*" average distance. The rationale behind this distinction is as follows:
+The application provides four output values: an average distance "*in time*"*, an "*location-dependent*" average distance, the Fréchet distance, and the Hausdorff distance. The rationale behind the distinction between location and time-dependent average distances is as follows:
 
 When sampling points along the track(s) to compare against the reference, it is possible to encounter multiple points at the same location if a person remains stationary for a period of time. Consequently, the longer the stationary period, the more the distance measurement becomes skewed towards that particular location. However, the focus may be on understanding the actual differences in paths, irrespective of movement speed or time. To address this, the algorithm simplifies the track using the Douglas-Peucker algorithm prior to calculating the average distance. This simplification process retains only points corresponding to changes in the path's direction, resulting in a simplified path. The average distance is then computed based on this simplified representation, which more accurately reflects the average distance between the paths, independent of movement speed or time.
+
+To provide a distance in meters for the Fréchet and Hausdorff distances, it is necessary to project the GPS coordinates onto a 2D plane. This is done using the [flat_projection crate](https://docs.rs/flat_projection/latest/flat_projection/). According to the crate's documentation, the projection is based on WGS84 and very precise for distances up to 500 km.
 
 ## Table of Contents
 
